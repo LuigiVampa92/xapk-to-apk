@@ -46,5 +46,15 @@ The easiest way to do it is to create an `xapktoapk.sign.properties` file with t
 This file must be placed in the same directory with `xapktoapk.py` script, OR you can put it in your user home directory (`~`).
 This way, repacked apk files will be signed automatically. 
 
+If you don't want to create a dedicated keystore to sign the result apk files, you can use your default Android SDK debug keystore. In this case, the contents of the `xapktoapk.sign.properties` file should look like this:
+```
+sign.enabled=true
+sign.keystore.file=/home/username/.android/debug.keystore 
+sign.keystore.password=android
+sign.key.alias=androiddebugkey
+sign.key.password=android
+```
+The `sign.keystore.file` value in the example above is for Linux. Set the absolute path according to your OS and system user name.
+
 By default, the resigning of the result apk files is disabled.
-If you do not want to sign it automatically, you can just do it manually after the conversion is completed.
+If you do not want to sign it automatically, you don't have to do it. You can just sign the apk file manually after the conversion is completed.
