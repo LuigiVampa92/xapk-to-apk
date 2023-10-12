@@ -1,0 +1,9 @@
+# this is an example file with config to resign apk
+# set sign.enabled value to true and other values according to the data of the keystore that will be used to sign apks
+# rename or copy this file to "xapktoapk.sign.properties" and put it in the script directory (if you run script locally) or in your user home directory
+
+sign.enabled=false
+sign.keystore.file=ABSOLUTE_PATH_TO_KEYSTORE_FILE.keystore
+sign.keystore.password=KEYSTORE_PASSWORD
+sign.key.alias=KEY_ALIAS
+sign.key.password=KEY_PASSWORD

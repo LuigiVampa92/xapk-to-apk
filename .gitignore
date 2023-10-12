@@ -1,0 +1,10 @@
+*.DS_Store
+*.xapk
+*.apk
+*.zip
+*.pyc
+*.prof
+.idea/
+.env/
+.xapktoapk/
+/xapktoapk.sign.properties
