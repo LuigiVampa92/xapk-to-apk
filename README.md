@@ -58,3 +58,22 @@ The `sign.keystore.file` value in the example above is for Linux. Set the absolu
 
 By default, the resigning of the result apk files is disabled.
 If you do not want to sign it automatically, you don't have to do it. You can just sign the apk file manually after the conversion is completed.
+
+### Docker
+
+Alternatively you can build and use the docker image to have a readily available environment. Ensure you have a folder containing your XAPK to mount to the container. 
+```bash
+docker build -t xapktoapk .
+docker run --rm -it -v ./data:/mnt/data xapktoapk /mnt/data/app.xapk
+```
+You may optionally mount your own properties and truststore.
+```bash
+docker build -t xapktoapk .
+docker run --rm -it \
+	-v ./data:/mnt/data xapktoapk /mnt/data/app.xapk \
+	-v ./home/username/.android/debug.keystore:/mnt/debug.keystore:ro \
+	-v ./xapktoapk.sign.properties:/xapktoapk/xapktoapk.sign.properties:ro \ # `sign.keystore.file` should point to `/mnt/debug.keystore`
+	xapktoapk \
+	/mnt/data/app.xapk
+```
+The converted `.apk` file will be available in the `data` folder. 
