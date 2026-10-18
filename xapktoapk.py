@@ -4,8 +4,10 @@
 import json
 import os
 import platform
+import re
 import shutil
 import sys
+import xml.etree.ElementTree as ET
 from zipfile import ZipFile
 
 from subprocess import call, STDOUT, Popen, list2cmdline
@@ -399,6 +401,39 @@ def delete_file_if_exists(path_to_file):
         os.remove(path_to_file)
 
 
+def resolve_apktool_dummy_names(dir_apk_main):
+    # split apks are decoded standalone, so references to resources defined in the base apk
+    # come out as APKTOOL_DUMMY_0x... placeholders; restore real names from the base public.xml
+    path_public_xml = os.path.join(dir_apk_main, 'res', 'values', 'public.xml')
+    if not os.path.exists(path_public_xml):
+        return
+
+    names_by_id = dict()
+    for public in ET.parse(path_public_xml).getroot().iter('public'):
+        res_id = public.get('id')
+        res_name = public.get('name')
+        if res_id is not None and res_name is not None:
+            names_by_id[int(res_id, 16)] = res_name
+
+    pattern_dummy = re.compile(r'APKTOOL_DUMMY_(0x[0-9a-fA-F]+)')
+
+    def replace_dummy(match):
+        return names_by_id.get(int(match.group(1), 16), match.group(0))
+
+    res_dir = os.path.join(dir_apk_main, 'res')
+    for root, dirs, files in os.walk(res_dir):
+        for file in files:
+            res_file_path = os.path.join(root, file)
+            if not file.endswith('.xml') or res_file_path == path_public_xml:
+                continue
+            with open(res_file_path, 'r', encoding='UTF-8') as res_file:
+                data = res_file.read()
+            if 'APKTOOL_DUMMY_' not in data:
+                continue
+            with open(res_file_path, 'w', encoding='UTF-8') as res_file:
+                res_file.write(pattern_dummy.sub(replace_dummy, data))
+
+
 def delete_signature_related_files(path_to_main_apk):
     # delete_file_if_exists(os.path.join(path_to_main_apk, 'unknown', 'stamp-cert-sha256'))
     # delete_file_if_exists(os.path.join(path_to_main_apk, 'original', 'stamp-cert-sha256'))
@@ -607,6 +642,7 @@ def main():
         merge_apk_resources(apk_main['apk_dir_path'], apk_locale['apk_dir_path'])
         merge_apk_assets(apk_main['apk_dir_path'], apk_locale['apk_dir_path'])
 
+    resolve_apktool_dummy_names(apk_main['apk_dir_path'])
     delete_signature_related_files(apk_main['apk_dir_path'])
     update_main_manifest_file(apk_main['apk_dir_path'])
 
