@@ -9,8 +9,10 @@ ARG APKTOOL_VERSION
 WORKDIR /xapktoapk
 COPY xapktoapk.py docker/entrypoint.sh ./
 
-# Dependencies: wget, java, keytool, zipalign, apksigner, apktool
-RUN apt update && apt -y install wget sdkmanager default-jdk-headless
+# Dependencies: java, keytool, zipalign, apksigner, apktool
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends wget sdkmanager default-jdk-headless \
+	&& rm -rf /var/lib/apt/lists/*
 RUN sdkmanager --install "build-tools;${BUILD_TOOLS_VERSION}"
 ENV PATH="$PATH:/opt/android-sdk/build-tools/${BUILD_TOOLS_VERSION}"
 RUN \
